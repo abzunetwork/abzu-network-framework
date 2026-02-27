@@ -170,6 +170,6 @@ NEXT STEPS:
 5. Deploy: Follow docs/DEPLOYMENT.md
 
 For support and contributions, visit:
-https://github.com/synthicsoft/abzunet-v2
+https://github.com/abzunetwork/abzu-network-framework
 
 ===================================================================
