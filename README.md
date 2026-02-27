@@ -261,7 +261,7 @@ Current focus areas for v2.0.x series:
 
 ## License
 
-AbzuNet was made for the people, by the poeole. It is open source, And we intend to keep it that way. AbzuNet was not built for profit, but rather, true resilience and freedom. Information should have always been free. In today's age, Industries and corporations own what was once a feee internet. Deploying AbzuNet is just reclaiming that freedom, and thus, our license, or lack thereof, reflects that. 
+AbzuNet was made for the people, by the people. It is open source, And we intend to keep it that way. AbzuNet was not built for profit, but rather, true resilience and freedom. Information should have always been free. In today's age, Industries and corporations own what was once a feee internet. Deploying AbzuNet is just reclaiming that freedom, and thus, our license, or lack thereof, reflects that. 
 
 at your option.
 
