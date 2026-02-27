@@ -2,10 +2,6 @@
 
 **Post-Internet Resilient Decentralized Storage and Computation Network**
 
-[![License](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE)
-[![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange.svg)](https://www.rust-lang.org/)
-[![Solidity](https://img.shields.io/badge/Solidity-0.8.24-363636.svg)](https://soliditylang.org/)
-
 ## Overview
 
 AbzuNet (𝔸) is a mathematically rigorous, self-healing decentralized network designed to survive complete fragmentation of the global internet infrastructure. Built with military-grade cryptography and zero-knowledge verification, AbzuNet provides content-addressed storage, distributed computation, and delay-tolerant networking capabilities that function even when traditional internet connectivity fails.
