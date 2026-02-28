@@ -1,159 +1,213 @@
-# AbzuNet v2.0.2
+# AbzuNet v2.0.1
 
-> **Internet of the People. By the People. For the People.**
+**Post-Internet Resilient Decentralized Storage and Computation Network**
 
----
+## Overview
 
-## What Is AbzuNet?
+AbzuNet (𝔸) is a mathematically rigorous, self-healing decentralized network designed to survive complete fragmentation of the global internet infrastructure. Built with military-grade cryptography and zero-knowledge verification, AbzuNet provides content-addressed storage, distributed computation, and delay-tolerant networking capabilities that function even when traditional internet connectivity fails.
 
-AbzuNet is a **post-internet resilient decentralized network** — a complete replacement for the internet's core functions that operates with or without traditional internet infrastructure.
+### Key Features
 
-No central servers. No corporate backbone. No single point of failure. No kill switch.
-
-When the internet goes down — whether from a natural disaster, infrastructure attack, government shutdown, or corporate failure — AbzuNet keeps running. As long as two devices can communicate (over WiFi, Ethernet, LoRa radio, or anything else that carries packets), AbzuNet works.
-
-**This is not a VPN. This is not a Tor overlay. This is a full replacement for the internet protocol stack at the application layer.**
-
----
-
-## What It Does Right Now
-
-Spin up a node in under 2 minutes:
-
-```bash
-cargo build --release -p abzu-node
-./target/release/abzu-node init --data-dir ~/.abzu
-./target/release/abzu-node run
-# Open: http://127.0.0.1:8080
-```
-
-Your browser opens to the **AbzuNet Browser** — a full web-like interface that requires zero internet connection:
-
-| Feature | Status |
-|---|---|
-| Store & retrieve files by cryptographic CID | ✅ Working |
-| Human-readable naming (Abzu Name System) | ✅ Working |
-| Peer discovery (mDNS + UDP broadcast) | ✅ Working |
-| DHT-based content routing (Kademlia) | ✅ Working |
-| Decentralized messaging (DTN email equivalent) | ✅ Working |
-| ZK slashing proofs (Groth16/BN254) | ✅ Working |
-| Blockchain settlement bridge (Arbitrum) | ✅ Working (optional) |
-| Embedded browser UI (no external dependencies) | ✅ Working |
-
----
-
-## The Vision
-
-The internet was not built for resilience. It was built for convenience, and then retrofitted with corporate control. Today:
-
-- A handful of companies control DNS — they can erase any website
-- ISPs can block, throttle, or spy on any connection
-- Governments can issue shutdown orders with a phone call
-- Natural disasters knock out entire regions
-- Submarine cables get cut
-
-AbzuNet fixes this at the architecture level. Every node is equal. Content is addressed by its cryptographic hash — not by a domain name someone can revoke. The network routes around damage, censorship, and outages automatically.
-
-**Roadmap:**
-- **v2.0.2 (now):** Full software stack — open source, run on any device with WiFi/Ethernet
-- **v2.1.x:** LoRa radio transport — extend the mesh to areas with no infrastructure, $30-50 per node
-- **v3.0:** Global mesh — every person with a node *is* the internet
-
----
+- **Zero-Knowledge Slashing**: Groth16 proofs over Poseidon hashes verify node misbehavior without revealing sensitive network topology
+- **Delay-Tolerant Networking (DTN)**: Vector clock synchronization enables offline operation with eventual consistency when connectivity returns
+- **Island-Aware Replication**: Content placement guarantees local copies survive network partitions while maintaining global availability
+- **Account Abstraction**: EIP-4337 integration eliminates gas payment friction for node operators
+- **Mesh Transport Layer**: UDP broadcast and WebRTC enable operation over local networks without internet routing
+- **Streaming Verification**: BLAKE3-based Bao streaming provides incremental cryptographic verification with O(1) memory usage
 
 ## Architecture
 
-AbzuNet replaces every critical internet function:
+### Phase 1: Identity & Network Topology
 
-| Internet Service | AbzuNet Equivalent |
-|---|---|
-| DNS | Abzu Name System (ANS) — DHT-backed, uncensorable |
-| Web server | BLAKE3 content-addressed store — content is the address |
-| Web browser | Embedded HTTP gateway with full browser UI |
-| Email | DTN store-and-forward with vector clock ordering |
-| CDN | Kademlia DHT replication across all nodes |
-| BGP routing | libp2p peer routing — self-healing mesh |
-| Authentication | Ed25519 keypairs — identity you own |
-
-### Identity
-
-Every node generates an Ed25519 keypair. Node identity is unforgeable:
+Every node possesses an Ed25519 keypair. The Node ID is derived as:
 
 ```
-N_id = BLAKE3(ed25519_pubkey)  ∈ {0,1}²⁵⁶
+N_id = BLAKE3(ed25519_pubkey)
 ```
 
-### Content Addressing
-
-Files are split into 4MB chunks. The Root CID is mathematically bound to the content:
+For zero-knowledge circuit compatibility with BN254 scalar field 𝔽_p, the 256-bit Node ID is split:
 
 ```
-R_cid = BLAKE3(chunk_0 ∥ chunk_1 ∥ ... ∥ chunk_n)
+N_high = N_id[0..16] as u128  // First 128 bits
+N_low  = N_id[16..32] as u128 // Second 128 bits
 ```
 
-If someone gives you a CID, you can verify the content is exactly what they promised — cryptographically, without trusting anyone.
+The network implements Kademlia DHT routing with deterministic GossipSub mesh topology. Heartbeat topics are segmented by the first byte of Node ID to prevent O(N) bandwidth exhaustion:
 
-### Network
+```
+topic = "abzu/heartbeat/{N_id[0]:02x}"
+```
 
-- **Kademlia DHT** (k=20): Decentralized content routing across all nodes
-- **GossipSub** (256-way segmented): Real-time message propagation that scales to millions of nodes
-- **mDNS + UDP Broadcast**: Works with zero configuration on local networks
-- **libp2p QUIC + TCP**: Encrypted, authenticated transport
+### Phase 2: Content-Addressable Storage
 
-### Messaging (DTN)
+Files are chunked into 4MB blocks. The Root CID is computed as:
 
-The delay-tolerant networking layer is AbzuNet's email system. Messages are:
-- Stored locally when the recipient is offline
-- Forwarded opportunistically when paths open up
-- Causally ordered with vector clocks across network partitions
-- Addressed by Node ID — no email provider required
+```
+R_cid = BLAKE3(chunk_0 || chunk_1 || ... || chunk_n)
+```
 
-### Zero-Knowledge Slashing
+Bao streaming enables incremental verification where each chunk is validated against its expected hash before being written to disk. The WASM client enforces strict O(1) memory usage by streaming directly to FileSystemWritableFileStream rather than accumulating in heap buffers.
 
-Misbehaving nodes get slashed via Groth16 ZK proofs over BN254. Reporters prove a node failed without revealing their own IP address or network position. The proof is verified on-chain by the Arbitrum smart contract.
+### Phase 3: Autonomous Favor Engine
 
----
+Node reputation is computed using a 5-dimensional EWMA over 120 samples (30-minute window):
+
+```
+Dimensions: [Uptime, Latency, Bandwidth, Storage, Geo-diversity]
+α = 2/121 ≈ 0.0165
+Threshold: score ≥ 2500 required for shard hosting
+```
+
+Health state transitions follow a deterministic state machine:
+
+```
+Alive (0-2 missed) → Suspect (3-4) → Dying (5-7) → AbsoluteDead (8+)
+```
+
+### Phase 4: Zero-Knowledge Slashing
+
+When a node reaches AbsoluteDead state, a Groth16 proof is generated with:
+
+**Public Inputs** (x):
+- Chain timestamp
+- Accused ID Poseidon hash: H_accused = 𝒫_2(N_high, N_low)
+- Three attempt Poseidon hashes: H_att_i = 𝒫_6(IP, nonce_i, AS_i, N_high, N_low, t_i)
+
+**Private Witness** (w):
+- Reporter IP address
+- Accused node coordinates (N_high, N_low)
+- Three nonces, BGP AS numbers, timestamps
+
+**R1CS Constraints**:
+1. Target binding: H_accused = 𝒫_2(N_high, N_low)
+2. BGP diversity: AS_1 ≠ AS_2 ≠ AS_3 (enforced via inverse multiplier gadget)
+3. Time bounds: t_chain - 900 ≤ t_1 ≤ t_2 ≤ t_3 ≤ t_chain
+4. Attempt binding: H_att_i = 𝒫_6(...) for i ∈ {1,2,3}
+
+### Phase 5: Cryptoeconomics
+
+**CID-Bound Escrow**: Storage payments are locked to specific content to prevent mempool front-running:
+
+```solidity
+ID_escrow = keccak256(Payer || R_cid || BlockNumber)
+```
+
+Relayers claim escrow by submitting M-of-N Ed25519 signatures from nodes proving replication. Contracts implement strict CEI (Checks-Effects-Interactions) pattern with ReentrancyGuard.
+
+**EIP-4337 Account Abstraction**: Operators pay gas in ABZU tokens via Paymaster, eliminating ETH dependency.
+
+### Phase 6: Delay-Tolerant Networking
+
+When blockchain connectivity fails, operations are queued in sled-backed persistent storage:
+
+```
+Queue key: src_nid || lamport_timestamp
+```
+
+Vector clock synchronization enables causal consistency. Upon peer reconnection, nodes exchange VectorClock maps, compute causal delta, and merge missing DtnEnvelopes.
+
+### Phase 7: Application Layer
+
+**Local Gateway**: HTTP proxy at 127.0.0.1:8080 translates REST requests to DHT lookups.
+
+**Abzu Name System (ANS)**: Human-readable names map to Ed25519 Domain IDs, which point to mutable Directory CIDs.
+
+**CRDT Synchronization**: Application state propagates via WebSocket to local node, then broadcasts as GossipSub deltas.
+
+## Project Structure
+
+```
+abzunet-v2.0.1/
+├── abzu-node/          # Core daemon (Rust + Tokio + libp2p)
+│   ├── src/
+│   │   ├── identity/   # Ed25519 keypairs, Node ID derivation
+│   │   ├── network/    # libp2p transports, Kademlia, GossipSub
+│   │   ├── storage/    # Content addressing, chunking, Bao streaming
+│   │   ├── favor/      # EWMA scoring, health state machine
+│   │   ├── zkp/        # Groth16 proving, Poseidon circuits
+│   │   ├── dtn/        # Vector clocks, persistent queues
+│   │   ├── bridge/     # Ethereum client, EIP-4337 bundler
+│   │   └── gateway/    # HTTP server, ANS resolver
+│   └── Cargo.toml
+├── abzu-sdk/           # Client library (Rust)
+│   └── src/
+├── abzu-wasm/          # Browser client (WASM)
+│   └── src/
+├── abzu-circuits/      # Zero-knowledge circuits (arkworks)
+│   ├── src/
+│   │   ├── poseidon/   # Poseidon hash gadgets
+│   │   ├── heartbeat/  # Slash proof circuit
+│   │   └── ceremony/   # Trusted setup utilities
+│   └── Cargo.toml
+├── contracts/          # Solidity smart contracts
+│   ├── src/
+│   │   ├── AbzuStorageEscrow.sol
+│   │   ├── AbzuSlashOracle.sol
+│   │   ├── AbzuNodeRegistry.sol
+│   │   └── AbzuPaymaster.sol
+│   ├── foundry.toml
+│   └── script/
+├── web/                # Browser gateway UI
+│   └── index.html
+├── scripts/            # Deployment and utilities
+│   ├── generate_poseidon_constants.py
+│   ├── deploy_contracts.sh
+│   └── genesis_orchestration.sh
+└── docs/              # Additional documentation
+    ├── SPECIFICATION.md
+    ├── CRYPTOGRAPHY.md
+    └── DEPLOYMENT.md
+```
 
 ## Building from Source
 
 ### Prerequisites
 
-- Rust 1.78+
-- (Optional) Foundry for smart contract deployment
-- (Optional) wasm-pack for WASM client
+- Rust 1.75+ with `wasm32-unknown-unknown` target
+- Node.js 18+ (for contract deployment)
+- Foundry (for Solidity compilation)
+- Python 3.9+ (for circuit parameter generation)
 
-### Build
-
-```bash
-git clone https://github.com/synthicsoft/abzunet-v2
-cd abzunet-v2.0.2
-
-# Build the node
-cargo build --release -p abzu-node
-
-# Run all tests
-cargo test --workspace
-```
-
-### Initialize and Run
+### Compilation
 
 ```bash
-# First time setup
-./target/release/abzu-node init --data-dir ~/.abzu
+# Clone repository
+git clone https://github.com/synthicsoft/abzunet-v2.git
+cd abzunet-v2
 
-# Start the node
-./target/release/abzu-node run --config ~/.abzu/abzu.toml
+# Build workspace
+cargo build --release
 
-# Check your identity
-./target/release/abzu-node identity
+# Run tests
+cargo test --all-features
 
-# Run ZK trusted setup (one time, for slashing)
-./target/release/abzu-node zk-setup --keys-dir ~/.abzu/zkkeys
+# Build WASM client
+cd abzu-wasm
+wasm-pack build --target web --release
 ```
 
-Open **http://127.0.0.1:8080** in any browser. That is the AbzuNet Browser.
+### Smart Contract Deployment
 
-### Configuration
+```bash
+cd contracts
+forge build
+forge test
+
+# Deploy to Arbitrum Sepolia testnet
+forge script script/Deploy.s.sol --rpc-url $ARBITRUM_RPC --broadcast
+```
+
+## Running a Node
+
+```bash
+# Generate configuration
+./target/release/abzu-node init --config abzu.toml
+
+# Start daemon
+RUST_LOG=info ./target/release/abzu-node start --config abzu.toml
+```
+
+Configuration example:
 
 ```toml
 [identity]
@@ -161,186 +215,60 @@ keyfile = "~/.abzu/identity.key"
 
 [network]
 listen_addrs = ["/ip4/0.0.0.0/tcp/4001", "/ip4/0.0.0.0/udp/4001/quic-v1"]
-bootstrap_peers = []       # Add peers here to join a larger network
-enable_mdns = true         # Auto-discover nodes on local network
+bootstrap_peers = []
+enable_mdns = true
 enable_udp_broadcast = true
 
 [storage]
-data_dir = "~/.abzu/store"
-max_storage_gb = 50
-island_tag = "default"
+data_dir = "~/.abzu/storage"
+max_storage_gb = 100
+island_tag = "home-network"
 
 [blockchain]
-arbitrum_rpc = ""          # Optional — network works without this
-registry_address = "0x0000000000000000000000000000000000000000"
-escrow_address = "0x0000000000000000000000000000000000000000"
-paymaster_address = "0x0000000000000000000000000000000000000000"
+arbitrum_rpc = "https://sepolia-rollup.arbitrum.io/rpc"
+registry_address = "0x..."
+escrow_address = "0x..."
+paymaster_address = "0x..."
 
 [gateway]
 enabled = true
 bind_addr = "127.0.0.1:8080"
 ```
 
----
+## Security Considerations
 
-## Project Structure
+This software implements cryptographic protocols and handles private keys. Review the security documentation in `docs/CRYPTOGRAPHY.md` before deploying to production. Key security properties:
 
-```
-abzunet-v2.0.2/
-├── abzu-node/              # Core daemon (Rust + Tokio + libp2p)
-│   └── src/
-│       ├── identity/       # Ed25519 keypairs, Node ID derivation
-│       ├── network/
-│       │   ├── behaviour.rs   # Composed libp2p behaviour
-│       │   ├── gossipsub.rs   # 256-way segmented GossipSub
-│       │   ├── kademlia.rs    # DHT config and CID routing
-│       │   ├── swarm.rs       # Full swarm event loop
-│       │   └── transport.rs   # UDP broadcast mesh transport
-│       ├── storage/
-│       │   ├── chunker.rs     # 4MB BLAKE3 chunker
-│       │   ├── store.rs       # sled-backed content store
-│       │   └── bao.rs         # Streaming verification (O(1) memory)
-│       ├── favor/          # EWMA reputation, health state machine
-│       ├── zkp/
-│       │   ├── circuit.rs     # R1CS HeartbeatFailureCircuit
-│       │   ├── poseidon.rs    # BN254 Poseidon hash
-│       │   └── prover.rs      # Groth16 prove/verify lifecycle
-│       ├── dtn/            # Store-and-forward messaging, vector clocks
-│       ├── bridge/         # Arbitrum blockchain bridge (optional)
-│       └── gateway/        # HTTP gateway + embedded browser UI
-├── abzu-sdk/               # Rust client library
-├── abzu-wasm/              # Browser WASM client
-├── abzu-circuits/          # arkworks ZK circuit crate
-├── contracts/              # Solidity: escrow, slashing, registry
-└── docs/
-    ├── SPECIFICATION.md
-    └── DEPLOYMENT.md
-```
-
----
-
-## Connecting to Other Nodes
-
-On the same local network, nodes discover each other automatically via mDNS. No configuration needed.
-
-To connect across the internet (while it exists) or across a manual link, add the remote node's multiaddress to `bootstrap_peers`:
-
-```toml
-bootstrap_peers = [
-  "/ip4/203.0.113.10/tcp/4001/p2p/12D3KooW..."
-]
-```
-
-Get your node's multiaddress from the `/status` endpoint or the Node Status page in the browser UI.
-
----
-
-## API Reference
-
-The gateway exposes a REST API at `http://127.0.0.1:8080`:
-
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/` | AbzuNet Browser UI |
-| GET | `/status` | Node status, peer count, disk usage |
-| GET | `/abzu/{cid}` | Retrieve content by 64-char hex CID |
-| POST | `/abzu/upload` | Upload file, returns CID |
-| GET | `/abzu/ls` | List all stored CIDs |
-| GET | `/abzu/peers` | Connected peer list |
-| GET | `/abzuname/{name}` | Resolve ANS name → CID |
-| POST | `/abzuname/{name}/{cid}` | Register ANS name |
-| GET | `/abzu/messages` | List inbox messages |
-| POST | `/abzu/messages/send` | Send DTN message |
-| GET | `/abzu/messages/{id}` | Read a message |
-| DELETE | `/abzu/messages/{id}` | Delete a message |
-
-### SDK Usage
-
-```rust
-use abzu_sdk::AbzuClient;
-
-let client = AbzuClient::new("http://127.0.0.1:8080");
-
-// Upload a file
-let result = client.upload(b"Hello, post-internet world!", "hello.txt").await?;
-println!("CID: {}", result.cid);
-
-// Retrieve by CID
-let data = client.get(&result.cid).await?;
-
-// Register a name
-client.register_name("mysite", &result.cid).await?;
-
-// Resolve a name
-let resolved = client.resolve_name("mysite").await?;
-```
-
----
-
-## Security
-
-- All transport is encrypted via the **Noise protocol** (libp2p standard)
-- Content integrity is **cryptographically guaranteed** by BLAKE3 — you cannot receive tampered content without detection
-- Node identity is **unforgeable** — Ed25519 signatures bind all protocol messages to their sender
-- ZK proofs reveal **zero information** beyond proof validity
-- Private keys **never leave** the local node
-- The blockchain bridge is **fully optional** — the network functions without it
-
----
-
-## Roadmap
-
-### v2.0.X (Active)
-- [ ] LoRa radio transport adapter (extend mesh beyond WiFi range)
-- [ ] Remote chunk fetch via DHT providers (cross-node content retrieval)
-- [ ] Ed25519 message signing in DTN layer
-- [ ] Bootstrap peer discovery via signed peer lists
-
-### v2.1.0
-- [ ] LoRa + Meshtastic hardware integration
-- [ ] Mobile node (Android/iOS)
-- [ ] Distributed compute (WASM runtime)
-
-### v3.0
-- [ ] Global LoRa mesh deployment
-- [ ] Satellite uplink integration
-- [ ] Full internet replacement at scale
-
----
+- All node-to-node communication is encrypted via Noise protocol
+- Content integrity is guaranteed through BLAKE3 cryptographic hashing
+- Zero-knowledge proofs reveal no information beyond statement validity
+- Private keys never leave local node storage
+- Smart contracts undergo formal verification and external audit
 
 ## Contributing
 
-AbzuNet is open source and free forever hence no license. 
+AbzuNet is open source software under MIT OR Apache-2.0 dual license. Contributions are welcome following our development guidelines. Please review `CONTRIBUTING.md` before submitting pull requests.
 
-Pull requests are welcome. The most impactful areas right now:
+### Development Priorities
 
-1. **LoRa transport** — implement `LoraTransport` as a libp2p transport
-2. **Remote chunk fetch** — dial DHT providers and retrieve missing chunks
-3. **Message signing** — wire Ed25519 signing into the DTN send path
-4. **Bootstrap discovery** — signed peer list distribution
+Current focus areas for v2.0.x series:
 
-Please open an issue before starting major work so we can coordinate.
-
----
+1. Distributed compute layer with WASM runtime integration
+2. Enhanced real-time communication over WebRTC data channels
+3. Decentralized identity with verifiable credentials
+4. Performance optimization for large-scale network operation
+5. Comprehensive test coverage including network partition scenarios
 
 ## License
 
-No license. Open Source. Free Forever. Power to the people! 
+No License. Forever Free. Power to the people. 
+
+## Acknowledgments
+
+Built with [arkworks](https://arkworks.rs/) zero-knowledge cryptography, [libp2p](https://libp2p.io/) networking stack, and [Foundry](https://getfoundry.sh/) smart contract framework.
+
+Developed by SynthicSoft Labs for resilient infrastructure research.
 
 ---
 
-## Built With
-
-- [libp2p](https://libp2p.io/) — peer-to-peer networking
-- [arkworks](https://arkworks.rs/) — zero-knowledge cryptography
-- [BLAKE3](https://github.com/BLAKE3-team/BLAKE3) — cryptographic hashing
-- [sled](https://github.com/spacejam/sled) — embedded database
-- [Axum](https://github.com/tokio-rs/axum) — async HTTP
-- [Foundry](https://getfoundry.sh/) — smart contract toolchain
-
----
-
-*Developed by [SynthicSoft Labs](https://synthicsoft.com)*
-
-> **The internet belongs to the people who build it.**
-> Run a node. Spread the mesh. Own your network.
+**Warning**: This is experimental software under active development. Do not use in production without thorough security review and testing.
