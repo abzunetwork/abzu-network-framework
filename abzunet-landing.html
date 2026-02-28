@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AbzuNet — Internet of the People</title>
+<meta name="description" content="A post-internet resilient decentralized network. No corporate backbone. No kill switch. Run a node. Own your internet.">
+<meta property="og:title" content="AbzuNet — Internet of the People">
+<meta property="og:description" content="A complete replacement for the internet that runs without the internet. Open source. Free forever.">
+<meta property="og:url" content="https://github.com/abzunetwork/abzu-network-framework">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Inter:wght@300;400;600&display=swap');
+
+  :root {
+    --teal: #19e3c8;
+    --teal2: #0cbfaa;
+    --teal-glow: rgba(25,227,200,0.15);
+    --teal-dim: rgba(25,227,200,0.05);
+    --bg: #040608;
+    --bg2: #070b10;
+    --panel: #0a1018;
+    --border: #0f2030;
+    --border2: #193040;
+    --text: #c8d8e8;
+    --muted: #4a6070;
+    --white: #f0f8ff;
+    --red: #ff3a5c;
+    --yellow: #f5c518;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── Scanline overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── Grid background ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(25,227,200,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(25,227,200,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 48px;
+    background: rgba(4,6,8,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 4px;
+    color: var(--teal);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--white); }
+
+  .nav-links { display: flex; gap: 32px; }
+  .nav-links a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--teal); }
+
+  .nav-cta {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--bg) !important;
+    background: var(--teal);
+    padding: 8px 20px;
+    border-radius: 2px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: background 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--teal2) !important; color: var(--bg) !important; }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(25,227,200,0.06) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .hero-signal {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0; left: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .signal-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(25,227,200,0.08);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    animation: ring-expand 6s ease-out infinite;
+  }
+  .signal-ring:nth-child(1) { width: 300px; height: 300px; animation-delay: 0s; }
+  .signal-ring:nth-child(2) { width: 600px; height: 600px; animation-delay: 1.5s; }
+  .signal-ring:nth-child(3) { width: 900px; height: 900px; animation-delay: 3s; }
+  .signal-ring:nth-child(4) { width: 1200px; height: 1200px; animation-delay: 4.5s; }
+
+  @keyframes ring-expand {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0.6; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+  }
+
+  .hero-eyebrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 4px;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    animation: fade-up 0.8s ease both;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 14vw, 11rem);
+    line-height: 0.9;
+    letter-spacing: 6px;
+    color: var(--white);
+    margin-bottom: 8px;
+    animation: fade-up 0.8s 0.1s ease both;
+  }
+
+  .hero-title .accent { color: var(--teal); }
+
+  .hero-sub {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 2.8rem);
+    letter-spacing: 8px;
+    color: var(--muted);
+    margin-bottom: 40px;
+    animation: fade-up 0.8s 0.2s ease both;
+  }
+
+  .hero-tagline {
+    font-size: 1.1rem;
+    font-weight: 300;
+    color: var(--text);
+    max-width: 560px;
+    line-height: 1.8;
+    margin-bottom: 52px;
+    animation: fade-up 0.8s 0.3s ease both;
+  }
+
+  .hero-tagline strong { color: var(--teal); font-weight: 600; }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fade-up 0.8s 0.4s ease both;
+  }
+
+  .btn-primary {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--teal);
+    border: none;
+    padding: 16px 36px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    transition: background 0.2s, transform 0.2s;
+  }
+  .btn-primary:hover { background: var(--teal2); transform: translateY(-2px); }
+
+  .btn-secondary {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--teal);
+    background: transparent;
+    border: 1px solid var(--teal);
+    padding: 16px 36px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    transition: background 0.2s, transform 0.2s;
+  }
+  .btn-secondary:hover { background: var(--teal-dim); transform: translateY(-2px); }
+
+  .hero-stats {
+    display: flex;
+    gap: 60px;
+    margin-top: 80px;
+    animation: fade-up 0.8s 0.5s ease both;
+  }
+
+  .hero-stat { text-align: center; }
+  .hero-stat .val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    color: var(--teal);
+    letter-spacing: 2px;
+    display: block;
+  }
+  .hero-stat .lbl {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── TICKER ── */
+  .ticker {
+    position: relative;
+    z-index: 1;
+    background: var(--teal);
+    padding: 10px 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .ticker-inner {
+    display: inline-flex;
+    gap: 80px;
+    animation: ticker 30s linear infinite;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    color: var(--bg);
+    text-transform: uppercase;
+  }
+
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 100px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 4px;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--teal);
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
+    letter-spacing: 4px;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+
+  .section-title .accent { color: var(--teal); }
+
+  /* ── PROBLEM ── */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2px;
+    margin-top: 48px;
+  }
+
+  .problem-item {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .problem-item:hover { border-color: var(--teal); }
+  .problem-item::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--red);
+  }
+
+  .problem-icon {
+    font-size: 1.8rem;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .problem-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+    color: var(--white);
+    margin-bottom: 10px;
+  }
+
+  .problem-desc {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ── SOLUTION ── */
+  .solution-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    margin-top: 48px;
+  }
+
+  .solution-list { display: flex; flex-direction: column; gap: 20px; }
+
+  .solution-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 20px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .solution-item:hover {
+    border-color: var(--teal);
+    background: var(--teal-dim);
+  }
+
+  .solution-check {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--teal);
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .solution-item-title {
+    font-weight: 600;
+    color: var(--white);
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+  }
+
+  .solution-item-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* Terminal */
+  .terminal {
+    background: #020406;
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    overflow: hidden;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .terminal-bar {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .terminal-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .terminal-dot:nth-child(1) { background: #ff5f57; }
+  .terminal-dot:nth-child(2) { background: #febc2e; }
+  .terminal-dot:nth-child(3) { background: #28c840; }
+
+  .terminal-title {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-left: 8px;
+    letter-spacing: 1px;
+  }
+
+  .terminal-body {
+    padding: 24px;
+    font-size: 0.82rem;
+    line-height: 2;
+  }
+
+  .t-comment { color: #3a5a6a; }
+  .t-cmd { color: var(--teal); }
+  .t-output { color: #7acc9a; }
+  .t-url { color: var(--yellow); }
+  .t-prompt { color: var(--muted); }
+
+  /* ── ARCHITECTURE TABLE ── */
+  .arch-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 48px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82rem;
+  }
+
+  .arch-table th {
+    text-align: left;
+    padding: 12px 20px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--teal);
+    letter-spacing: 2px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+  }
+
+  .arch-table td {
+    padding: 14px 20px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    transition: background 0.15s;
+  }
+
+  .arch-table tr:hover td { background: var(--teal-dim); }
+
+  .arch-table td:first-child { color: var(--muted); }
+  .arch-table td:last-child { color: var(--teal); }
+
+  .status-done {
+    color: #28c840;
+    font-size: 0.75rem;
+  }
+
+  /* ── ROADMAP ── */
+  .roadmap {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 48px;
+  }
+
+  .roadmap-phase {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 36px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .roadmap-phase.active {
+    border-color: var(--teal);
+  }
+
+  .roadmap-phase.active::after {
+    content: 'ACTIVE';
+    position: absolute;
+    top: 16px; right: 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: var(--bg);
+    background: var(--teal);
+    padding: 3px 8px;
+  }
+
+  .phase-version {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--teal);
+    letter-spacing: 3px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .phase-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: block;
+  }
+
+  .phase-items { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+  .phase-items li {
+    font-size: 0.85rem;
+    color: var(--text);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.5;
+  }
+
+  .phase-items li::before {
+    content: '→';
+    color: var(--teal);
+    font-family: 'Share Tech Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .phase-items li.done { color: var(--muted); }
+  .phase-items li.done::before { content: '✓'; color: #28c840; }
+
+  /* ── CTA SECTION ── */
+  .cta-section {
+    text-align: center;
+    padding: 120px 48px;
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center bottom, rgba(25,227,200,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .cta-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 8vw, 6rem);
+    letter-spacing: 6px;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+
+  .cta-title .accent { color: var(--teal); }
+
+  .cta-sub {
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 500px;
+    margin: 0 auto 48px;
+    line-height: 1.8;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82rem;
+    letter-spacing: 1px;
+  }
+
+  .share-box {
+    background: var(--panel);
+    border: 1px solid var(--border2);
+    padding: 20px 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 40px;
+    max-width: 600px;
+    width: 100%;
+  }
+
+  .share-url {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--teal);
+    flex: 1;
+    text-align: left;
+    word-break: break-all;
+  }
+
+  .copy-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--teal);
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .copy-btn:hover { background: var(--teal2); }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 40px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 4px;
+    color: var(--teal);
+  }
+  .footer-logo span { color: var(--white); }
+
+  .footer-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-align: center;
+  }
+
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--teal); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 14px 20px; }
+    .nav-links { display: none; }
+    section { padding: 60px 20px; }
+    .solution-wrap { grid-template-columns: 1fr; }
+    .roadmap { grid-template-columns: 1fr; }
+    .hero-stats { gap: 30px; flex-wrap: wrap; justify-content: center; }
+    footer { flex-direction: column; gap: 20px; text-align: center; }
+    .footer-links { flex-wrap: wrap; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">ABZU<span>NET</span></a>
+  <div class="nav-links">
+    <a href="#problem">Problem</a>
+    <a href="#solution">Solution</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="https://github.com/abzunetwork/abzu-network-framework" class="nav-cta">GitHub →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-signal">
+    <div class="signal-ring"></div>
+    <div class="signal-ring"></div>
+    <div class="signal-ring"></div>
+    <div class="signal-ring"></div>
+  </div>
+
+  <div class="hero-eyebrow">v2.0.2 — Open Source — Free Forever</div>
+  <h1 class="hero-title">ABZU<span class="accent">NET</span></h1>
+  <div class="hero-sub">Internet of the People</div>
+  <p class="hero-tagline">
+    A <strong>complete replacement for the internet</strong> that runs without the internet.
+    No corporate backbone. No kill switch. No central authority.
+    Every node you run <strong>is</strong> the network.
+  </p>
+  <div class="hero-actions">
+    <a href="https://github.com/abzunetwork/abzu-network-framework" class="btn-primary">Get the Code</a>
+    <a href="#solution" class="btn-secondary">How It Works</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <span class="val">100%</span>
+      <span class="lbl">Open Source</span>
+    </div>
+    <div class="hero-stat">
+      <span class="val">0</span>
+      <span class="lbl">Central Servers</span>
+    </div>
+    <div class="hero-stat">
+      <span class="val">∞</span>
+      <span class="lbl">Kill Switches</span>
+    </div>
+    <div class="hero-stat">
+      <span class="val">Rust</span>
+      <span class="lbl">Built With</span>
+    </div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span>No Kill Switch</span>
+    <span>★</span>
+    <span>BLAKE3 Content Addressing</span>
+    <span>★</span>
+    <span>Kademlia DHT</span>
+    <span>★</span>
+    <span>Zero Knowledge Proofs</span>
+    <span>★</span>
+    <span>DTN Messaging</span>
+    <span>★</span>
+    <span>Ed25519 Identity</span>
+    <span>★</span>
+    <span>LoRa Ready</span>
+    <span>★</span>
+    <span>Internet of the People</span>
+    <span>★</span>
+    <span>No Kill Switch</span>
+    <span>★</span>
+    <span>BLAKE3 Content Addressing</span>
+    <span>★</span>
+    <span>Kademlia DHT</span>
+    <span>★</span>
+    <span>Zero Knowledge Proofs</span>
+    <span>★</span>
+    <span>DTN Messaging</span>
+    <span>★</span>
+    <span>Ed25519 Identity</span>
+    <span>★</span>
+    <span>LoRa Ready</span>
+    <span>★</span>
+    <span>Internet of the People</span>
+    <span>★</span>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="section-label">The Problem</div>
+  <h2 class="section-title">THE INTERNET<br><span class="accent">IS BROKEN</span></h2>
+  <p style="color:var(--muted);max-width:560px;line-height:1.8;font-size:0.95rem;">
+    The internet was built for convenience and retrofitted with corporate control. The result is infrastructure that can be censored, surveilled, and shut down by a handful of companies and governments.
+  </p>
+  <div class="problem-grid">
+    <div class="problem-item">
+      <span class="problem-icon">🔌</span>
+      <div class="problem-title">Kill Switches</div>
+      <p class="problem-desc">Governments can order ISPs to shut down internet access for entire countries. It has happened. It will happen again.</p>
+    </div>
+    <div class="problem-item">
+      <span class="problem-icon">🏢</span>
+      <div class="problem-title">Corporate Control</div>
+      <p class="problem-desc">A handful of companies control DNS, CDN, and cloud hosting. They can erase any website, any service, any person from the internet.</p>
+    </div>
+    <div class="problem-item">
+      <span class="problem-icon">👁️</span>
+      <div class="problem-title">Surveillance</div>
+      <p class="problem-desc">Every packet you send passes through infrastructure owned by corporations with business models built on monetizing your data.</p>
+    </div>
+    <div class="problem-item">
+      <span class="problem-icon">⚡</span>
+      <div class="problem-title">Single Points of Failure</div>
+      <p class="problem-desc">Natural disasters, submarine cable cuts, and infrastructure attacks can knock out connectivity for entire regions in seconds.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section id="solution">
+  <div class="section-label">The Solution</div>
+  <h2 class="section-title">AN INTERNET<br><span class="accent">THAT CANNOT</span><br>BE STOPPED</h2>
+  <div class="solution-wrap">
+    <div class="solution-list">
+      <div class="solution-item">
+        <span class="solution-check">[✓]</span>
+        <div>
+          <div class="solution-item-title">Content-Addressed Storage</div>
+          <p class="solution-item-desc">Files are addressed by their cryptographic hash. You can't censor a hash. The content IS the address.</p>
+        </div>
+      </div>
+      <div class="solution-item">
+        <span class="solution-check">[✓]</span>
+        <div>
+          <div class="solution-item-title">Decentralized Name System</div>
+          <p class="solution-item-desc">The Abzu Name System runs on a DHT. No ICANN. No registrar. No domain that can be revoked.</p>
+        </div>
+      </div>
+      <div class="solution-item">
+        <span class="solution-check">[✓]</span>
+        <div>
+          <div class="solution-item-title">Self-Healing Mesh</div>
+          <p class="solution-item-desc">libp2p Kademlia routing finds paths around failures automatically. No BGP. No AS numbers. No choke points.</p>
+        </div>
+      </div>
+      <div class="solution-item">
+        <span class="solution-check">[✓]</span>
+        <div>
+          <div class="solution-item-title">LoRa Radio Ready</div>
+          <p class="solution-item-desc">v2.0.3 adds LoRa transport. 5-15km range per node, $30-50 hardware. The physical mesh that cannot be unplugged.</p>
+        </div>
+      </div>
+      <div class="solution-item">
+        <span class="solution-check">[✓]</span>
+        <div>
+          <div class="solution-item-title">Delay-Tolerant Messaging</div>
+          <p class="solution-item-desc">Messages route through the network opportunistically. Works across intermittent links, disasters, and network partitions.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="terminal-dot"></div>
+        <div class="terminal-dot"></div>
+        <div class="terminal-dot"></div>
+        <span class="terminal-title">abzu-node — bash</span>
+      </div>
+      <div class="terminal-body">
+        <div><span class="t-comment"># Install Rust, then:</span></div>
+        <div>&nbsp;</div>
+        <div><span class="t-prompt">$ </span><span class="t-cmd">git clone https://github.com/abzunetwork/</span></div>
+        <div><span class="t-cmd">&nbsp;&nbsp;abzu-network-framework</span></div>
+        <div>&nbsp;</div>
+        <div><span class="t-prompt">$ </span><span class="t-cmd">cargo build --release -p abzu-node</span></div>
+        <div>&nbsp;</div>
+        <div><span class="t-prompt">$ </span><span class="t-cmd">./abzu-node init --data-dir ~/.abzu</span></div>
+        <div><span class="t-output">  ✓ Identity generated</span></div>
+        <div><span class="t-output">  ✓ Config written to ~/.abzu/abzu.toml</span></div>
+        <div>&nbsp;</div>
+        <div><span class="t-prompt">$ </span><span class="t-cmd">./abzu-node run</span></div>
+        <div><span class="t-output">  ✓ Node ID: 19e3c8a4f2...</span></div>
+        <div><span class="t-output">  ✓ Listening on /ip4/0.0.0.0/tcp/4001</span></div>
+        <div><span class="t-output">  ✓ Gateway: </span><span class="t-url">http://127.0.0.1:8080</span></div>
+        <div><span class="t-output">  ✓ AbzuNet Browser ready</span></div>
+        <div>&nbsp;</div>
+        <div><span class="t-comment"># You are now the internet.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div class="section-label">Architecture</div>
+  <h2 class="section-title">EVERY LAYER<br><span class="accent">REPLACED</span></h2>
+  <table class="arch-table">
+    <thead>
+      <tr>
+        <th>Internet Service</th>
+        <th>AbzuNet Equivalent</th>
+        <th>Technology</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>DNS</td>
+        <td>Abzu Name System (ANS)</td>
+        <td>Kademlia DHT records</td>
+        <td><span class="status-done">✓ v2.0.2</span></td>
+      </tr>
+      <tr>
+        <td>Web Server</td>
+        <td>BLAKE3 Content Store</td>
+        <td>sled + chunker + Bao</td>
+        <td><span class="status-done">✓ v2.0.2</span></td>
+      </tr>
+      <tr>
+        <td>Web Browser</td>
+        <td>Embedded Gateway UI</td>
+        <td>Axum + vanilla JS</td>
+        <td><span class="status-done">✓ v2.0.2</span></td>
+      </tr>
+      <tr>
+        <td>Email</td>
+        <td>DTN Messaging</td>
+        <td>Vector clocks + GossipSub</td>
+        <td><span class="status-done">✓ v2.0.2</span></td>
+      </tr>
+      <tr>
+        <td>CDN</td>
+        <td>DHT Replication</td>
+        <td>Kademlia k=20</td>
+        <td><span class="status-done">✓ v2.0.2</span></td>
+      </tr>
+      <tr>
+        <td>Authentication</td>
+        <td>Ed25519 Identity</td>
+        <td>BLAKE3(pubkey) = NodeID</td>
+        <td><span class="status-done">✓ v2.0.2</span></td>
+      </tr>
+      <tr>
+        <td>BGP Routing</td>
+        <td>libp2p Mesh</td>
+        <td>QUIC + TCP + mDNS</td>
+        <td><span class="status-done">✓ v2.0.2</span></td>
+      </tr>
+      <tr>
+        <td>Physical Layer</td>
+        <td>LoRa Radio Mesh</td>
+        <td>libp2p LoRa transport</td>
+        <td style="color:var(--yellow);">⚡ v2.0.3</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap">
+  <div class="section-label">Roadmap</div>
+  <h2 class="section-title">THE PATH TO<br><span class="accent">ZERO DEPENDENCY</span></h2>
+  <div class="roadmap">
+    <div class="roadmap-phase active">
+      <span class="phase-version">v2.0.2</span>
+      <span class="phase-name">Protocol Complete</span>
+      <ul class="phase-items">
+        <li class="done">BLAKE3 content addressing</li>
+        <li class="done">Kademlia DHT routing</li>
+        <li class="done">GossipSub mesh (256-way)</li>
+        <li class="done">DTN store-and-forward</li>
+        <li class="done">Embedded browser UI</li>
+        <li class="done">ZK slashing (Groth16)</li>
+        <li class="done">Blockchain bridge</li>
+      </ul>
+    </div>
+    <div class="roadmap-phase">
+      <span class="phase-version">v2.0.3</span>
+      <span class="phase-name">LoRa Transport</span>
+      <ul class="phase-items">
+        <li>LoRa libp2p transport adapter</li>
+        <li>Meshtastic hardware bridge</li>
+        <li>Remote chunk fetch via DHT</li>
+        <li>Ed25519 message signing</li>
+        <li>Bootstrap peer discovery</li>
+      </ul>
+    </div>
+    <div class="roadmap-phase">
+      <span class="phase-version">v3.0</span>
+      <span class="phase-name">Global Mesh</span>
+      <ul class="phase-items">
+        <li>Global LoRa node deployment</li>
+        <li>Mobile nodes (Android/iOS)</li>
+        <li>Satellite uplink integration</li>
+        <li>Distributed compute (WASM)</li>
+        <li>Full internet independence</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2 class="cta-title">RUN A <span class="accent">NODE.</span><br>BE THE <span class="accent">INTERNET.</span></h2>
+  <p class="cta-sub">
+    Every person who runs a node strengthens the mesh.<br>
+    No permission required. No account needed.<br>
+    Open source. Free forever. Power to the people.
+  </p>
+  <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+    <a href="https://github.com/abzunetwork/abzu-network-framework" class="btn-primary">View on GitHub</a>
+    <a href="https://github.com/abzunetwork/abzu-network-framework/archive/refs/heads/main.zip" class="btn-secondary">Download v2.0.2</a>
+  </div>
+  <div class="share-box" style="margin:40px auto 0;">
+    <span class="share-url">https://github.com/abzunetwork/abzu-network-framework</span>
+    <button class="copy-btn" onclick="navigator.clipboard.writeText('https://github.com/abzunetwork/abzu-network-framework').then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000)})">Copy</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">ABZU<span>NET</span></div>
+  <div class="footer-text">
+    Built by SynthicSoft Labs · No license · Open Source · Free Forever<br>
+    Internet of the People · By the People · For the People
+  </div>
+  <div class="footer-links">
+    <a href="https://github.com/abzunetwork/abzu-network-framework">GitHub</a>
+    <a href="https://github.com/abzunetwork/abzu-network-framework/blob/main/abzu-net-yellowpaper.md">Yellow Paper</a>
+    <a href="https://github.com/abzunetwork/abzu-network-framework/issues">Contribute</a>
+  </div>
+</footer>
+
+</body>
+</html>
