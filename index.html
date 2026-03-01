@@ -375,11 +375,7 @@
     background: var(--red);
   }
 
-  .problem-icon {
-    font-size: 1.8rem;
-    margin-bottom: 16px;
-    display: block;
-  }
+  .problem-icon { display: none; }
 
   .problem-title {
     font-family: 'Bebas Neue', sans-serif;
@@ -593,7 +589,7 @@
   }
 
   .phase-items li.done { color: var(--muted); }
-  .phase-items li.done::before { content: '✓'; color: #28c840; }
+  .phase-items li.done::before { content: '+'; color: #28c840; }
 
   /* ── CTA SECTION ── */
   .cta-section {
@@ -712,12 +708,30 @@
   @media (max-width: 768px) {
     nav { padding: 14px 20px; }
     .nav-links { display: none; }
+    .nav-links.open { display: flex; }
     section { padding: 60px 20px; }
     .solution-wrap { grid-template-columns: 1fr; }
     .roadmap { grid-template-columns: 1fr; }
-    .hero-stats { gap: 30px; flex-wrap: wrap; justify-content: center; }
+    .hero-stats { gap: 0; flex-wrap: wrap; justify-content: center; width: 100%; }
+    .hero-stat { flex: 1 1 40%; padding: 12px 8px; }
     footer { flex-direction: column; gap: 20px; text-align: center; }
     .footer-links { flex-wrap: wrap; justify-content: center; }
+    .problem-grid { grid-template-columns: 1fr; }
+    .hero { padding: 100px 20px 60px; }
+    .hero-actions { flex-direction: column; align-items: center; }
+    .btn-primary, .btn-secondary { width: 100%; max-width: 320px; text-align: center; }
+    .share-box { flex-direction: column; align-items: stretch; }
+    .copy-btn { width: 100%; }
+    .arch-table { font-size: 0.72rem; }
+    .arch-table th, .arch-table td { padding: 10px 12px; }
+    .cta-section { padding: 80px 20px; }
+  }
+
+  @media (max-width: 480px) {
+    .hero-title { letter-spacing: 2px; }
+    .hero-sub { letter-spacing: 4px; }
+    .hero-stat { flex: 1 1 45%; }
+    .section-title { font-size: clamp(1.8rem, 8vw, 3rem); letter-spacing: 2px; }
   }
 </style>
 </head>
@@ -727,11 +741,8 @@
 <nav>
   <a href="#" class="nav-logo">ABZU<span>NET</span></a>
   <div class="nav-links">
-    <a href="#problem">Problem</a>
-    <a href="#solution">Solution</a>
-    <a href="#architecture">Architecture</a>
-    <a href="#roadmap">Roadmap</a>
-    <a href="https://github.com/abzunetwork/abzu-network-framework" class="nav-cta">GitHub →</a>
+    <a href="https://github.com/abzunetwork/abzu-network-framework/blob/main/abzu-net-yellowpaper.md" target="_blank" rel="noopener">Yellow Paper</a>
+    <a href="https://github.com/abzunetwork/abzu-network-framework" class="nav-cta" target="_blank" rel="noopener">Run a Node</a>
   </div>
 </nav>
 
@@ -745,7 +756,7 @@
     <div class="signal-ring"></div>
   </div>
 
-  <div class="hero-eyebrow">v2.0.2 — Open Source — Free Forever</div>
+  <div class="hero-eyebrow">v2.0.3 — Open Source — Free Forever</div>
   <h1 class="hero-title">ABZU<span class="accent">NET</span></h1>
   <div class="hero-sub">Internet of the People</div>
   <p class="hero-tagline">
@@ -767,7 +778,7 @@
       <span class="lbl">Central Servers</span>
     </div>
     <div class="hero-stat">
-      <span class="val">∞</span>
+      <span class="val">0</span>
       <span class="lbl">Kill Switches</span>
     </div>
     <div class="hero-stat">
@@ -781,37 +792,37 @@
 <div class="ticker">
   <div class="ticker-inner">
     <span>No Kill Switch</span>
-    <span>★</span>
+    <span>//</span>
     <span>BLAKE3 Content Addressing</span>
-    <span>★</span>
+    <span>//</span>
     <span>Kademlia DHT</span>
-    <span>★</span>
+    <span>//</span>
     <span>Zero Knowledge Proofs</span>
-    <span>★</span>
+    <span>//</span>
     <span>DTN Messaging</span>
-    <span>★</span>
+    <span>//</span>
     <span>Ed25519 Identity</span>
-    <span>★</span>
+    <span>//</span>
     <span>LoRa Ready</span>
-    <span>★</span>
+    <span>//</span>
     <span>Internet of the People</span>
-    <span>★</span>
+    <span>//</span>
     <span>No Kill Switch</span>
-    <span>★</span>
+    <span>//</span>
     <span>BLAKE3 Content Addressing</span>
-    <span>★</span>
+    <span>//</span>
     <span>Kademlia DHT</span>
-    <span>★</span>
+    <span>//</span>
     <span>Zero Knowledge Proofs</span>
-    <span>★</span>
+    <span>//</span>
     <span>DTN Messaging</span>
-    <span>★</span>
+    <span>//</span>
     <span>Ed25519 Identity</span>
-    <span>★</span>
+    <span>//</span>
     <span>LoRa Ready</span>
-    <span>★</span>
+    <span>//</span>
     <span>Internet of the People</span>
-    <span>★</span>
+    <span>//</span>
   </div>
 </div>
 
@@ -824,22 +835,22 @@
   </p>
   <div class="problem-grid">
     <div class="problem-item">
-      <span class="problem-icon">🔌</span>
+      <span class="problem-icon"></span>
       <div class="problem-title">Kill Switches</div>
       <p class="problem-desc">Governments can order ISPs to shut down internet access for entire countries. It has happened. It will happen again.</p>
     </div>
     <div class="problem-item">
-      <span class="problem-icon">🏢</span>
+      <span class="problem-icon"></span>
       <div class="problem-title">Corporate Control</div>
       <p class="problem-desc">A handful of companies control DNS, CDN, and cloud hosting. They can erase any website, any service, any person from the internet.</p>
     </div>
     <div class="problem-item">
-      <span class="problem-icon">👁️</span>
+      <span class="problem-icon"></span>
       <div class="problem-title">Surveillance</div>
       <p class="problem-desc">Every packet you send passes through infrastructure owned by corporations with business models built on monetizing your data.</p>
     </div>
     <div class="problem-item">
-      <span class="problem-icon">⚡</span>
+      <span class="problem-icon"></span>
       <div class="problem-title">Single Points of Failure</div>
       <p class="problem-desc">Natural disasters, submarine cable cuts, and infrastructure attacks can knock out connectivity for entire regions in seconds.</p>
     </div>
@@ -905,14 +916,14 @@
         <div><span class="t-prompt">$ </span><span class="t-cmd">cargo build --release -p abzu-node</span></div>
         <div>&nbsp;</div>
         <div><span class="t-prompt">$ </span><span class="t-cmd">./abzu-node init --data-dir ~/.abzu</span></div>
-        <div><span class="t-output">  ✓ Identity generated</span></div>
-        <div><span class="t-output">  ✓ Config written to ~/.abzu/abzu.toml</span></div>
+        <div><span class="t-output">  + Identity generated</span></div>
+        <div><span class="t-output">  + Config written to ~/.abzu/abzu.toml</span></div>
         <div>&nbsp;</div>
         <div><span class="t-prompt">$ </span><span class="t-cmd">./abzu-node run</span></div>
-        <div><span class="t-output">  ✓ Node ID: 19e3c8a4f2...</span></div>
-        <div><span class="t-output">  ✓ Listening on /ip4/0.0.0.0/tcp/4001</span></div>
-        <div><span class="t-output">  ✓ Gateway: </span><span class="t-url">http://127.0.0.1:8080</span></div>
-        <div><span class="t-output">  ✓ AbzuNet Browser ready</span></div>
+        <div><span class="t-output">  + Node ID: 19e3c8a4f2...</span></div>
+        <div><span class="t-output">  + Listening on /ip4/0.0.0.0/tcp/4001</span></div>
+        <div><span class="t-output">  + Gateway: </span><span class="t-url">http://127.0.0.1:8080</span></div>
+        <div><span class="t-output">  + AbzuNet Browser ready</span></div>
         <div>&nbsp;</div>
         <div><span class="t-comment"># You are now the internet.</span></div>
       </div>
@@ -980,7 +991,7 @@
         <td>Physical Layer</td>
         <td>LoRa Radio Mesh</td>
         <td>libp2p LoRa transport</td>
-        <td style="color:var(--yellow);">⚡ v2.0.3</td>
+        <td style="color:var(--yellow);">v2.0.3</td>
       </tr>
     </tbody>
   </table>
@@ -991,7 +1002,7 @@
   <div class="section-label">Roadmap</div>
   <h2 class="section-title">THE PATH TO<br><span class="accent">ZERO DEPENDENCY</span></h2>
   <div class="roadmap">
-    <div class="roadmap-phase active">
+    <div class="roadmap-phase">
       <span class="phase-version">v2.0.2</span>
       <span class="phase-name">Protocol Complete</span>
       <ul class="phase-items">
@@ -1004,15 +1015,15 @@
         <li class="done">Blockchain bridge</li>
       </ul>
     </div>
-    <div class="roadmap-phase">
+    <div class="roadmap-phase active">
       <span class="phase-version">v2.0.3</span>
       <span class="phase-name">LoRa Transport</span>
       <ul class="phase-items">
-        <li>LoRa libp2p transport adapter</li>
-        <li>Meshtastic hardware bridge</li>
-        <li>Remote chunk fetch via DHT</li>
-        <li>Ed25519 message signing</li>
-        <li>Bootstrap peer discovery</li>
+        <li class="done">LoRa libp2p transport adapter</li>
+        <li class="done">Meshtastic hardware bridge</li>
+        <li class="done">Autonomous Node Reward System</li>
+        <li class="done">ABZU token economics</li>
+        <li class="done">On-chain epoch reporting</li>
       </ul>
     </div>
     <div class="roadmap-phase">
@@ -1039,7 +1050,7 @@
   </p>
   <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
     <a href="https://github.com/abzunetwork/abzu-network-framework" class="btn-primary">View on GitHub</a>
-    <a href="https://github.com/abzunetwork/abzu-network-framework/archive/refs/heads/main.zip" class="btn-secondary">Download v2.0.2</a>
+    <a href="https://github.com/abzunetwork/abzu-network-framework/blob/main/abzu-net-yellowpaper.md" class="btn-secondary">Read the Yellowpaper</a>
   </div>
   <div class="share-box" style="margin:40px auto 0;">
     <span class="share-url">https://github.com/abzunetwork/abzu-network-framework</span>
