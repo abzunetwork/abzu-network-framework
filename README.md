@@ -1,4 +1,4 @@
-# AbzuNet v2.0.1
+# AbzuNet v2.0.3
 
 **Post-Internet Resilient Decentralized Storage and Computation Network**
 
@@ -117,7 +117,7 @@ Vector clock synchronization enables causal consistency. Upon peer reconnection,
 ## Project Structure
 
 ```
-abzunet-v2.0.1/
+abzunet-v2.0.3/
 ├── abzu-node/          # Core daemon (Rust + Tokio + libp2p)
 │   ├── src/
 │   │   ├── identity/   # Ed25519 keypairs, Node ID derivation
@@ -172,7 +172,7 @@ abzunet-v2.0.1/
 
 ```bash
 # Clone repository
-git clone https://github.com/synthicsoft/abzunet-v2.git
+git clone https://github.com/abzunetwork/abzu-network-framework.git
 cd abzunet-v2
 
 # Build workspace
@@ -261,7 +261,7 @@ Current focus areas for v2.0.x series:
 
 ## License
 
-No License. Forever Free. Power to the people. 
+No License. Open-Source & Free forever. 
 
 ## Acknowledgments
 
